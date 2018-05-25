@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  nginx:
+    container_name: nginx
+    image: lmctague/nginx:1.13.12
+    restart: always
+    volumes:
+       - .:/var/www/html
+       - ./docker/volumes/nginx/conf.d:/etc/nginx/conf.d:ro
+    links:
+      - php-fpm
+    ports:
+      - "80:80"
+
+  php-cli:
+    container_name: php-cli
+    image: lmctague/php:7.1-cli
+    restart: always
+    volumes:
+      - .:/var/www/html
+    tty: true
+    stdin_open: true
+
+  php-fpm:
+    container_name: php-fpm
+    image: lmctague/php:7.1-fpm
+    restart: always
+    volumes:
+      - .:/var/www/html
+    links:
+      - mysql
+    ports:
+      - "9000:9000"
+    depends_on:
+      - mysql
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: homestead
+      DB_USERNAME: homestead
+      DB_PASSWORD: secret
+
+  mysql:
+    container_name: mysql
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Password01
+      MYSQL_DATABASE: homestead
+      MYSQL_USER: homestead
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
